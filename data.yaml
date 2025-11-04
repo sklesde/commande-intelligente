@@ -1,0 +1,9 @@
+path: .
+train: images/train
+val: images/val
+
+names:
+  0: Plane
+  1: Cisors
+  2: Glue
+  3: Pen

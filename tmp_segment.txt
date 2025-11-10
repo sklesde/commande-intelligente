@@ -1,0 +1,17 @@
+            if self.cap is not None:
+                self.cap.release()
+            try:
+                cv2.destroyWindow(self.window_name)
+            except Exception:
+                pass
+
+# ---------- programme principal ----------
+def main():
+    # clamp durée chunk
+    chunk_sec = min(float(CHUNK_DURATION_SEC), MAX_CHUNK_SEC)
+    if chunk_sec <= 0:
+        raise ValueError("CHUNK_DURATION_SEC doit être > 0.")
+    if not (0.0 < MARGIN_RATIO <= 1.0):
+        raise ValueError("MARGIN_RATIO doit être dans (0, 1].")
+
+    # YOLO (device choisi via DEVICE_RESOLVED)

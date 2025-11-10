@@ -25,6 +25,8 @@ AMBIENT_SEC           = 0.0        # calibration bruit ambiant (0 pour désactiv
 LANGUAGES             = ("fr-FR", "en-US")  # ordre d’essai pour la reco Google
 OUTPUT_DIR            = "audio_captures"    # dossier pour le ring buffer audio
 RING_SIZE             = 5                   # 5 fichiers max
+# Durée d'enregistrement audio par chunk (secondes)
+AUDIO_RECORD_SECONDS  = 6.0
 
 # Sélection audio persistante (classe dessinée en continu tant qu'on ne change pas)
 PERSIST_SELECTED      = True
@@ -178,6 +180,49 @@ def find_first_keyword(text: str, patterns: Sequence[Tuple[str, int, str]]) -> O
             if best is None or idx < best[2]:
                 best = (class_id, term, idx)
     return None if best is None else (best[0], best[1])
+
+def find_keywords_multiple(text: str, patterns: Sequence[Tuple[str, int, str]]) -> List[Tuple[int, str]]:
+    """
+    Retourne toutes les classes mentionnées dans le texte (ordre d'apparition),
+    dédupliquées par classe. Chaque élément = (class_id, terme_detecte)
+    """
+    normalized_text = normalize_text(text)
+    if not normalized_text:
+        return []
+    # Ex: map class_id -> (first_index, term)
+    found: Dict[int, Tuple[int, str]] = {}
+    for norm_term, class_id, term in patterns:
+        if not norm_term:
+            continue
+        m = re.search(rf"\b{re.escape(norm_term)}\b", normalized_text)
+        if not m:
+            continue
+        idx = m.start()
+        if class_id not in found or idx < found[class_id][0]:
+            found[class_id] = (idx, term)
+    # Trie par index croissant d'apparition
+    ordered = sorted(found.items(), key=lambda kv: kv[1][0])
+    return [(cid, data[1]) for cid, data in ordered]
+
+def is_all_objects_request(text: str) -> bool:
+    """
+    Détecte si le texte demande d'afficher "tous/tout/all/everything".
+    Basé sur quelques patrons FR/EN simples. Évite le piège "pas du tout".
+    """
+    t = normalize_text(text)
+    if not t:
+        return False
+    # Garde-fou contre le faux positif courant
+    if "pas du tout" in t:
+        return False
+    patterns = [
+        r"\b(tout|tous|toutes|toute)\b",
+        r"\b(tous|toutes)\s+les\s+(objets|elements|items)\b",
+        r"\b(affiche(r)?|montre(r)?|display|show)\s+(tout|tous|toutes|all|everything)\b",
+        r"\b(all|everything)\b",
+        r"\b(all\s+objects|every\s+object|all\s+items)\b",
+    ]
+    return any(re.search(p, t) for p in patterns)
 
 # ---------- Device resolver (GPU si dispo, sinon CPU) ----------
 def resolve_device(dev: str) -> str:
@@ -403,6 +448,13 @@ class VisualLoop(threading.Thread):
 def main():
     # clamp durée chunk
     chunk_sec = min(float(CHUNK_DURATION_SEC), MAX_CHUNK_SEC)
+    # Override via AUDIO_RECORD_SECONDS (variable de configuration)
+    try:
+        chunk_sec = float(AUDIO_RECORD_SECONDS)
+    except NameError:
+        pass
+    if chunk_sec <= 0:
+        raise ValueError("AUDIO_RECORD_SECONDS doit Ǧtre > 0.")
     if chunk_sec <= 0:
         raise ValueError("CHUNK_DURATION_SEC doit être > 0.")
     if not (0.0 < MARGIN_RATIO <= 1.0):
@@ -463,6 +515,28 @@ def main():
                 print(f"[slot {slot_index}] Pas de transcription exploitable.")
                 return
             transcript, confidence, language = result
+
+            # Ajout: intents "tous" et multi-objets (FR/EN)
+            if is_all_objects_request(transcript):
+                # Afficher tous les objets -> réinitialise filtres et sélection
+                visual.set_selected_class(None)
+                with visual.lock:
+                    visual.allowed_ids = None
+                print(f"[slot {slot_index}] Mode général (tous les objets). (ASR: {language}, conf {confidence:.2f})")
+                return
+
+            found_multi = find_keywords_multiple(transcript, keyword_patterns)
+            if found_multi:
+                target_ids = [cid for cid, _ in found_multi]
+                terms = [term for _, term in found_multi]
+                if len(target_ids) >= 2:
+                    labels = [class_names.get(cid, f"classe {cid}") for cid in target_ids]
+                    # Filtrage des objets demandés en mode auto-détection
+                    visual.set_selected_class(None)
+                    with visual.lock:
+                        visual.allowed_ids = set(target_ids)
+                    print(f"[slot {slot_index}] Filtre objets -> {', '.join(labels)} (demande: {', '.join(repr(t) for t in terms)}, ASR: {language}, conf {confidence:.2f})")
+                    return
 
             # Cherche la 1re classe mentionnée
             keyword = find_first_keyword(transcript, keyword_patterns)

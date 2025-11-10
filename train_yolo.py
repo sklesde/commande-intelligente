@@ -5,7 +5,7 @@ model = YOLO("yolov8n.pt")
 
 model.train(
     data="data.yaml",      # fichier de configuration
-    imgsz=640,             # taille des images (plus petit = plus rapide)
+    imgsz=480,             # taille des images (plus petit = plus rapide)
     epochs=30,             # nombre de passes sur le dataset
     batch=8,               # nombre d’images traitées en parallèle
     workers=0,             # pour Windows + CPU

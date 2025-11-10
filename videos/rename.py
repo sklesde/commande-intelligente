@@ -18,13 +18,13 @@ from typing import Dict, List, Optional, Tuple
 
 # ===================== CONFIG =====================
 FOLDER      = r".\videos\images_de_videos"       # Dossier à traiter
-FILE_PREFIX = "img_ciseaux"           # Filtre: ne prendre que les fichiers dont le nom commence par ce préfixe (laisser "" pour tout)
+FILE_PREFIX = "img_avion"           # Filtre: ne prendre que les fichiers dont le nom commence par ce préfixe (laisser "" pour tout)
 RECURSIVE   = False                   # True: parcourir les sous-dossiers ; False: dossier courant uniquement
 
 # --- Édition des classes dans les .txt ---
 ENABLE_CLASS_EDIT = True              # Activer le remplacement du premier identifiant de classe
-CLASS_FROM = 15                        # Remplacer si le premier token == CLASS_FROM ...
-CLASS_TO   = 3                        # ... par CLASS_TO
+CLASS_FROM = 16                       # Remplacer si le premier token == CLASS_FROM ...
+CLASS_TO   = 0                        # ... par CLASS_TO
 BACKUP     = True                     # Créer un .bak du .txt avant écriture
 
 # --- Renommage des fichiers ---
@@ -39,8 +39,8 @@ IMAGE_EXTS = ("jpg", "jpeg", "png")   # Extensions d'image possibles (ordre de p
 #   "{NEW_PREFIX}_{seq:03d}"    -> img_ciseaux_216 (avec padding si seq=216 -> "216")
 #   "{old_stem}_v2"             -> garde l'ancien nom et ajoute suffixe
 NAME_PATTERN  = "{NEW_PREFIX}_{seq}"
-NEW_PREFIX    = "img_stylo"         # Utilisé par NAME_PATTERN
-RENAME_START_AT = 150                # Numéro de départ pour 'seq' (numéro séquentiel des nouveaux noms)
+NEW_PREFIX    = "img_avion"         # Utilisé par NAME_PATTERN
+RENAME_START_AT = 1              # Numéro de départ pour 'seq' (numéro séquentiel des nouveaux noms)
 
 # --- Nettoyage orphelins ---
 DELETE_ORPHAN_IMAGES = True           # True: supprimer les images sans .txt correspondant (même stem)

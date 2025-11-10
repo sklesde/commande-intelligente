@@ -2,10 +2,10 @@ import cv2
 from pathlib import Path
 
 # --- Paramètres à personnaliser ---
-video_path = r".\videos\Stylo3.mov"
-output_dir = Path("./") / "videos"
+video_path = r".\videos\Avion4.mov"
+output_dir = Path("./") / "videos/images_de_videos"
 name = "ciseaux"          # 🔧 <-- choisis ici ton nom (ex: "test", "capture", etc.)
-start_index_default = 139   # nombre de départ si aucun fichier n’existe
+start_index_default = 0   # nombre de départ si aucun fichier n’existe
 X = 5                     # 1 image sur X
 
 # --- Préparation du dossier ---

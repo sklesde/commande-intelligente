@@ -11,7 +11,7 @@ Script audio+vision prêt pour VS Code (Run ▶).
 # ============================ CONFIG ============================
 
 # Source visuelle : chemin image/vidéo, "cam" pour la webcam par défaut, ou un index ("0", "1", …).
-SOURCE                = "test/video_test_1.mp4"   # ex: "test/photo.jpg" | "test/video.mp4" | "cam" | "0"
+SOURCE = "cam"   # ex: "test/photo.jpg" | "test/video.mp4" | "cam" | "0"
 
 # Détection YOLO continue sur le flux
 AUTO_DETECT           = True       # True pour détecter en continu sur image/vidéo/webcam quand aucune classe n'est "lockée"

@@ -636,7 +636,7 @@ def main():
 
     print_known_classes(known_names)
 
-    window_name = "Detections cibles"
+    window_name = "Text detection"
     # Shared state + input thread
     state = TargetState()
     if args.targets:

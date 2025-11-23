@@ -35,7 +35,7 @@ SELECT_EVERY          = 2          # inférence toutes les N frames pour la clas
 # YOLO
 MODEL_PATH            = "runs_plane/yolov8n_plane/weights/best.pt"
 IMG_SIZE              = 640
-MIN_CONFIDENCE        = 0.35       # >= 0.35 recommandé
+MIN_CONFIDENCE        = 0.2       # >= 0.35 recommandé
 IOU_THRESHOLD         = 0.45       # NMS
 
 # Affichage
@@ -491,7 +491,7 @@ def main():
     microphone = speech_rec.Microphone()
 
     # UI visuelle
-    window_name = "Aperçu média"
+    window_name = "Vocal detection"
     stop_event = threading.Event()
     visual = VisualLoop(
         str(SOURCE), window_name, float(MARGIN_RATIO), stop_event,
